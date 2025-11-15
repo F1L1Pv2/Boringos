@@ -57,47 +57,35 @@ int main(int argc, char** argv){
     if(needs_rebuild1("build/iso/boot/BOOTX64.EFI", "thirdparty/Limine/BOOTX64.EFI")){
         if(!copy_file("thirdparty/Limine/BOOTX64.EFI", "build/iso/boot/BOOTX64.EFI")) return 1;
     }
-
-    /*
-    xorriso -as mkisofs
-            -R -r -J 
-            -b boot/limine-bios-cd.bin
-            -no-emul-boot
-            -boot-load-size 4
-            -boot-info-table
-            -hfsplus
-            -apm-block-size 2048
-            --efi-boot boot/limine-uefi-cd.bin
-            -efi-boot-part
-            --efi-boot-image
-            --protective-msdos-label
-            build/iso
-            -o ./build/boringos.iso
-    */
-
-    /*
-    xorriso -as mkisofs -R -r -J  -b boot/limine-bios-cd.bin -no-emul-boot -boot-load-size 4 -boot-info-table -hfsplus -apm-block-size 2048 --efi-boot boot/limine-uefi-cd.bin -efi-boot-part --efi-boot-image --protective-msdos-label build/iso -o ./build/boringos.iso
-    */
-
-    cmd_append(&cmd,
-        "xorriso",
-        "-as", "mkisofs",
-        "-R", "-r", "-J",
-        "-b", "boot/limine-bios-cd.bin",
-        "-no-emul-boot",
-        "-boot-load-size", "4",
-        "-boot-info-table",
-        "-hfsplus",
-        "-apm-block-size", "2048",
-        "--efi-boot", "boot/limine-uefi-cd.bin",
-        "-efi-boot-part",
-        "--efi-boot-image",
-        "--protective-msdos-label",
-        "build/iso",
-        "-o", "build/boringos.iso"
-    );
-
-    if(!cmd_run_sync_and_reset(&cmd)) return 1;
+    
+    bool iso_needs_rebuild = needs_rebuild1("build/boringos.iso", "build/iso/boringos-kernel")
+                        || needs_rebuild1("build/boringos.iso", "build/iso/boot/limine.conf")
+                        || needs_rebuild1("build/boringos.iso", "build/iso/boot/limine-uefi-cd.bin")
+                        || needs_rebuild1("build/boringos.iso", "build/iso/boot/limine-bios.sys")
+                        || needs_rebuild1("build/boringos.iso", "build/iso/boot/limine-bios-cd.bin")
+                        || needs_rebuild1("build/boringos.iso", "build/iso/boot/BOOTX64.EFI");
+    
+    if(iso_needs_rebuild){
+        cmd_append(&cmd,
+            "xorriso",
+            "-as", "mkisofs",
+            "-R", "-r", "-J",
+            "-b", "boot/limine-bios-cd.bin",
+            "-no-emul-boot",
+            "-boot-load-size", "4",
+            "-boot-info-table",
+            "-hfsplus",
+            "-apm-block-size", "2048",
+            "--efi-boot", "boot/limine-uefi-cd.bin",
+            "-efi-boot-part",
+            "--efi-boot-image",
+            "--protective-msdos-label",
+            "build/iso",
+            "-o", "build/boringos.iso"
+        );
+    
+        if(!cmd_run_sync_and_reset(&cmd)) return 1;
+    }
 
     if(run){
         cmd_append(&cmd, "qemu-system-x86_64", "-cdrom", "build/boringos.iso");

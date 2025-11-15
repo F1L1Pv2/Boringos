@@ -35,7 +35,7 @@ int main(int argc, char** argv){
         const char* src = asm_sources.items[i];
         const char* out = temp_sprintf("%s/kernel/%s.o", build_dir, path_skip_one(src));
         da_append(&objs, out);
-        if(!c_needs_rebuild1(&stb, &pathb, out, src)) continue;
+        if(!needs_rebuild1(out, src)) continue;
         cmd_append(&cmd, "x86_64-elf-gcc", "-c", src, "-o", out);
         if(!cmd_run_sync_and_reset(&cmd)) return 1;
     }
