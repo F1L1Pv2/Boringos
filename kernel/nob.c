@@ -50,6 +50,7 @@ int main(int argc, char** argv){
             "-Wall", "-Wextra", 
             "-ffreestanding", "-fno-pie", "-mno-red-zone", "-fno-stack-protector",
             "-MMD", "-MP",
+            "-I../thirdparty/Limine",
             "-c", src, "-o", out,
         );
         if(!cmd_run_sync_and_reset(&cmd)) {  
